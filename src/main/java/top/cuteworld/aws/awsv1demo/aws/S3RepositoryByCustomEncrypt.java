@@ -7,41 +7,54 @@ import com.amazonaws.services.s3.model.CryptoConfigurationV2;
 import com.amazonaws.services.s3.model.CryptoMode;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.StaticEncryptionMaterialsProvider;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import top.cuteworld.aws.awsv1demo.encrypt.KeyHandler;
 
+import javax.annotation.PreDestroy;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 
+@Slf4j
+@Component
 public class S3RepositoryByCustomEncrypt {
 
-    void rsaS3CustomEncrypt(String bucket_name) throws NoSuchAlgorithmException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(2048);
+    private final KeyHandler keyHandler;
+    private final AmazonS3EncryptionV2 amazonS3EncryptionV2;
 
-        // --
-        // generate an asymmetric key pair for testing
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+    public S3RepositoryByCustomEncrypt(KeyHandler keyHandler) {
+        this.keyHandler = keyHandler;
 
-        String s3ObjectKey = "EncryptedContent3.txt";
-        String s3ObjectContent = "This is the 3rd content to encrypt";
+        //初始化一个 配置了 客户端加密的客户端
+        CryptoConfigurationV2 cryptoConfigurationV2 = new CryptoConfigurationV2().withCryptoMode(CryptoMode.StrictAuthenticatedEncryption);
+        KeyPair keyPair = keyHandler.getKeyPair();
+        StaticEncryptionMaterialsProvider staticEncryptionMaterialsProvider = new StaticEncryptionMaterialsProvider(new EncryptionMaterials(keyPair));
 
-
-        // --
-
-        AmazonS3EncryptionV2 s3Encryption = AmazonS3EncryptionClientV2Builder.standard()
-                .withRegion(Regions.US_WEST_2)
-                .withCryptoConfiguration(new CryptoConfigurationV2().withCryptoMode(CryptoMode.StrictAuthenticatedEncryption))
-                .withEncryptionMaterialsProvider(new StaticEncryptionMaterialsProvider(new EncryptionMaterials(keyPair)))
+        amazonS3EncryptionV2 = AmazonS3EncryptionClientV2Builder.standard()
+                .withRegion(Regions.US_EAST_2)
+                .withCryptoConfiguration(cryptoConfigurationV2) //加密配置
+                .withEncryptionMaterialsProvider(staticEncryptionMaterialsProvider) //加密材料提供方 keyPair在这里维护
                 .build();
-
-        s3Encryption.putObject(bucket_name, s3ObjectKey, s3ObjectContent);
-        System.out.println(s3Encryption.getObjectAsString(bucket_name, s3ObjectKey));
-        s3Encryption.shutdown();
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        S3RepositoryByCustomEncrypt s3RepositoryByCustomEncrypt = new S3RepositoryByCustomEncrypt();
-        s3RepositoryByCustomEncrypt.rsaS3CustomEncrypt("emr.cuteworld.top");
+    public void saveObject(String s3BucketName, String s3ObjectKey, String s3ObjectContent) {
+        amazonS3EncryptionV2.putObject(s3BucketName, s3ObjectKey, s3ObjectContent);
+        if (log.isDebugEnabled()) {
+            log.debug("Save object to bucket {} at {}", s3BucketName, s3ObjectKey);
+        }
     }
+
+    public String fetchObject(String s3Bucket, String s3ObjectKey) {
+        return amazonS3EncryptionV2.getObjectAsString(s3Bucket, s3ObjectKey);
+    }
+
+    @PreDestroy
+    void destroy() {
+        log.info("Will shutdown the s3 client");
+        if (amazonS3EncryptionV2 != null) {
+            amazonS3EncryptionV2.shutdown();
+        }
+
+    }
+
 }
 

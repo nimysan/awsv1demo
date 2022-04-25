@@ -38,11 +38,11 @@
             <artifactId>aws-java-sdk-dynamodb</artifactId>
         </dependency>
         <!--解决：The Bouncy castle library jar is required on the classpath to enable authenticated encryption -->
-        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15to18 -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.69</version>
+            <artifactId>bcprov-jdk15to18</artifactId>
+            <version>1.70</version>
         </dependency>
 
 
