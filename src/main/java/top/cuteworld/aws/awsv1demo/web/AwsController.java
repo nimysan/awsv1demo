@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import top.cuteworld.aws.awsv1demo.aws.S3RepositoryByCustomEncrypt;
+import top.cuteworld.aws.awsv1demo.aws.S3Repository;
 
 @RestController
 @Slf4j
@@ -13,7 +13,7 @@ import top.cuteworld.aws.awsv1demo.aws.S3RepositoryByCustomEncrypt;
 @RequestMapping("aws")
 public class AwsController {
 
-    private final S3RepositoryByCustomEncrypt s3RepositoryByCustomEncrypt;
+    private final S3Repository s3Repository;
 
     /**
      * @param s3Bucket
@@ -22,7 +22,7 @@ public class AwsController {
      */
     @GetMapping("s3/upload")
     public void uploadToS3(String s3Bucket, String s3ObjectKey, String s3ObjectContent) {
-        s3RepositoryByCustomEncrypt.saveObject(s3Bucket, s3ObjectKey, s3ObjectContent);
+        s3Repository.saveObject(s3Bucket, s3ObjectKey, s3ObjectContent);
     }
 
     /**
@@ -34,7 +34,7 @@ public class AwsController {
      */
     @GetMapping("s3/fetch")
     public String fetchFromS3(String s3Bucket, String s3ObjectKey) {
-        return s3RepositoryByCustomEncrypt.fetchObject(s3Bucket, s3ObjectKey);
+        return s3Repository.fetchObject(s3Bucket, s3ObjectKey);
     }
 
 }

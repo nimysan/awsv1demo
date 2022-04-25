@@ -17,12 +17,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
 @Configuration
-public class KeyConfig {
-
-    @Bean
-    public KeyHandler keyHandler() {
-        return new KeyHandlerTempImpl();
-    }
+public class S3ClientConfig {
 
     @Qualifier("s3EncryptedClientByJava")
     @Bean
@@ -48,7 +43,7 @@ public class KeyConfig {
     public AmazonS3EncryptionV2 composeS3ClientByKMS() throws NoSuchAlgorithmException {
 
         AWSKMS kmsClient = AWSKMSClientBuilder.standard()
-                .withRegion(Regions.DEFAULT_REGION)
+                .withRegion(Regions.US_EAST_2)
                 .build();
 
         // 这里是每次都创建一个key， 正常使用应该使用一个维护好的key

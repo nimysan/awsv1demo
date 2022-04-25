@@ -10,14 +10,23 @@
 
 ## 说明
 
+> 两种管理密钥的方式  1 完全自行管理（比如简单的Java KeyGenerator) 2 基于AWS KMS管理
+
+*TODO： 应该还有一种管理方式管理密钥: AWS CloudHSM*
+
 初始化客户端
 
 ```java
-CryptoConfigurationV2 cryptoConfigurationV2 = new CryptoConfigurationV2().withCryptoMode(CryptoMode.StrictAuthenticatedEncryption);
-KeyPair keyPair = keyHandler.getKeyPair();
-StaticEncryptionMaterialsProvider staticEncryptionMaterialsProvider = new StaticEncryptionMaterialsProvider(new EncryptionMaterials(keyPair));
+        //自行管理key pair
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        keyPairGenerator.initialize(2048);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-amazonS3EncryptionV2 = AmazonS3EncryptionClientV2Builder.standard()
+        //初始化一个 配置了 客户端加密的客户端
+        CryptoConfigurationV2 cryptoConfigurationV2 = new CryptoConfigurationV2().withCryptoMode(CryptoMode.StrictAuthenticatedEncryption);
+        StaticEncryptionMaterialsProvider staticEncryptionMaterialsProvider = new StaticEncryptionMaterialsProvider(new EncryptionMaterials(keyPair));
+
+        return AmazonS3EncryptionClientV2Builder.standard()
         .withRegion(Regions.US_EAST_2)
         .withCryptoConfiguration(cryptoConfigurationV2) //加密配置
         .withEncryptionMaterialsProvider(staticEncryptionMaterialsProvider) //加密材料提供方 keyPair在这里维护

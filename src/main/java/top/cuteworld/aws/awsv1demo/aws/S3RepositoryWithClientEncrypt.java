@@ -8,14 +8,14 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class S3RepositoryWithKMS implements S3Repository {
+public class S3RepositoryWithClientEncrypt implements S3Repository {
 
     /**
-     * 这里选用不同的客户端实现
+     * 这里选用不同的客户端实现 (可以 基于自行管理的 KeyPair 或者是 AWS管理的key pair;
      *
      * @param amazonS3EncryptionV2
      */
-    public S3RepositoryWithKMS(@Qualifier("s3EncryptedClientByAWSKms") @Autowired AmazonS3EncryptionV2 amazonS3EncryptionV2) {
+    public S3RepositoryWithClientEncrypt(@Qualifier("s3EncryptedClientByAWSKms") @Autowired AmazonS3EncryptionV2 amazonS3EncryptionV2) {
         this.amazonS3EncryptionV2 = amazonS3EncryptionV2;
     }
 
