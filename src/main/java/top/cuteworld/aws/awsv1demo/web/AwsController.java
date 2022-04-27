@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.cuteworld.aws.awsv1demo.aws.S3Repository;
+import top.cuteworld.aws.awsv1demo.mp.HighLevelMultipartUpload;
 
 @RestController
 @Slf4j
@@ -14,6 +15,7 @@ import top.cuteworld.aws.awsv1demo.aws.S3Repository;
 public class AwsController {
 
     private final S3Repository s3Repository;
+    private final HighLevelMultipartUpload highLevelMultipartUpload;
 
     /**
      * @param s3Bucket
@@ -35,6 +37,14 @@ public class AwsController {
     @GetMapping("s3/fetch")
     public String fetchFromS3(String s3Bucket, String s3ObjectKey) {
         return s3Repository.fetchObject(s3Bucket, s3ObjectKey);
+    }
+
+    /**
+     * 触发一个多分段上传的例子
+     */
+    @GetMapping("s3/multipartupload")
+    public void multipartUpload() {
+        highLevelMultipartUpload.sample();
     }
 
 }
